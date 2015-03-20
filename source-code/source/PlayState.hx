@@ -6,6 +6,7 @@ import flixel.FlxState;
 import flixel.text.FlxText;
 import flixel.ui.FlxButton;
 import flixel.util.FlxMath;
+import flixel.FlxObject;
 
 /**
  * A FlxState which can be used for the actual gameplay.
@@ -15,9 +16,13 @@ class PlayState extends FlxState
 	/**
 	 * Function that is called up when to state is created to set it up.
 	 */
+
+	var player:Player;
+
 	override public function create():Void
 	{
 		super.create();
+
 		var grass = addSprite('assets/images/grass-tile.png');
 		var tilesWide:Int = Math.ceil(FlxG.width / grass.width);
 		var tilesHigh:Int = Math.ceil(FlxG.height / grass.height);
@@ -35,6 +40,8 @@ class PlayState extends FlxState
 				s.y = y * grass.height;
 			}
 		}
+
+		add(new Player(200, 100));		
 	}
 
 	/**
