@@ -9,12 +9,15 @@ import flixel.FlxObject;
 import flixel.FlxSprite;
 import flixel.util.FlxAngle;
 import flixel.FlxG;
+import flixel.util.FlxPoint;
 
 class Player extends FlxSprite
 {
 
 	public var speed:Float = 0;
+	private static var ZERO_VELOCITY:FlxPoint = new FlxPoint(0, 0);
 
+	// TODO: replace with ECS
 	public function new(x:Float=0, y:Float=0)
 	{
 		super(x, y);
@@ -30,9 +33,9 @@ class Player extends FlxSprite
 		// allow auto-flipping
 		setFacingFlip(FlxObject.LEFT, false, false);
 		setFacingFlip(FlxObject.RIGHT, true, false);
-		//animation.add("d", [0, 1, 0, 2], fps, false);
-		animation.add("lr", [0, 1, 2, 3], fps, false);
-		//animation.add("u", [6, 7, 6, 8], fps, false);
+		//animation.add("d", [0, 1, 0, 2], fps, true);
+		animation.add("lr", [0, 1, 2, 3], fps, true);
+		//animation.add("u", [6, 7, 6, 8], fps, true);
 	}
 
 	override public function draw():Void
@@ -74,6 +77,8 @@ class Player extends FlxSprite
 
 		if ( _up || _down || _left || _right)
 		{
+			// mA: angle of movement. If speed is 200, this block makes the player
+			// move at 200px, regardless of angle (it's normalized as a vector). I think.
 			var mA:Float = 0;
 			if (_up)
 			{
@@ -107,8 +112,16 @@ class Player extends FlxSprite
 			}
 
 			FlxAngle.rotatePoint(speed, 0, 0, 0, mA, velocity);
+		} else {
+			// don't move if no keys are down
+			FlxAngle.rotatePoint(0, 0, 0, 0, 0, velocity);
+			if (this.animation.curAnim != null) {
+				this.animation.curAnim.curFrame = 0;
+				this.animation.curAnim.stop();				
+			}
 		}
 	}
+
 
 	override public function update():Void
 	{
