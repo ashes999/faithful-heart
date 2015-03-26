@@ -10,6 +10,10 @@ import flixel.FlxSprite;
 import flixel.util.FlxAngle;
 import flixel.FlxG;
 import flixel.util.FlxPoint;
+import flixel.input.gamepad.FlxGamepad;
+import flixel.input.gamepad.XboxButtonID;
+import flixel.input.gamepad.OUYAButtonID;
+import flixel.input.gamepad.OUYAButtonID;
 
 class Player extends FlxSprite
 {
@@ -58,74 +62,104 @@ class Player extends FlxSprite
 		super.draw();
 	}
 
-	private function movement():Void
+	public function move():Void
 	{
+		var gamePad = FlxG.gamepads.lastActive;
+		var gamePadX:Float = 0;
+		var gamePadY:Float = 0;
+
+		if (gamePad == null)
+		{
+			#if (OUYA)
+				// TODO: freeze/notify that the gamepad is off.
+				return;
+			#end
+		} else {
+			// TODO: turns into LEFT_ANALOG_STICK
+			var xAxisValue = gamePad.getXAxis(OUYAButtonID.LEFT_ANALOGUE_X);
+			var yAxisValue = gamePad.getYAxis(OUYAButtonID.LEFT_ANALOGUE_Y);
+      var angle:Float;
+
+      if (xAxisValue != 0 || yAxisValue != 0)
+			{
+				angle = Math.atan2(yAxisValue, xAxisValue);
+				gamePadX = Math.cos(angle);
+				gamePadY = Math.sin(angle);
+			}
+		}
+
 		var _up:Bool = false;
 		var _down:Bool = false;
 		var _left:Bool = false;
 		var _right:Bool = false;
 
-		_up = FlxG.keys.anyPressed(["UP", "W"]);
-		_down = FlxG.keys.anyPressed(["DOWN", "S"]);
-		_left = FlxG.keys.anyPressed(["LEFT", "A"]);
-		_right = FlxG.keys.anyPressed(["RIGHT", "D"]);
+		_up = FlxG.keys.anyPressed(["UP", "W"]) || gamePadY < 0;
+		_down = FlxG.keys.anyPressed(["DOWN", "S"]) || gamePadY > 0;
+		_left = FlxG.keys.anyPressed(["LEFT", "A"]) || gamePadX < 0;
+		_right = FlxG.keys.anyPressed(["RIGHT", "D"]) || gamePadX > 0;
 
 		if (_up && _down)
 			_up = _down = false;
 		if (_left && _right)
 			_left = _right = false;
 
-		if ( _up || _down || _left || _right)
+		var mA:Float = 0; // our temporary angle
+		if (_up)  // the player is pressing UP
 		{
-			// mA: angle of movement. If speed is 200, this block makes the player
-			// move at 200px, regardless of angle (it's normalized as a vector). I think.
-			var mA:Float = 0;
-			if (_up)
-			{
-				mA = -90;
-				if (_left)
-					mA -= 45;
-				else if (_right)
-					mA += 45;
+		    mA = -90; // set our angle to -90 (12 o'clock)
+		    if (_left)
+		        mA -= 45; // if the player is also pressing LEFT, subtract 45 degrees from our angle - we're moving up and left
+		    else if (_right)
+		        mA += 45; // similarly, if the player is pressing RIGHT, add 45 degrees (up and right)
+		    facing = FlxObject.UP; // the sprite should be facing UP
+		}
+		else if (_down) // the player is pressing DOWN
+		{
+		    mA = 90; // set our angle to 90 (6 o'clock)
+		    if (_left)
+		        mA += 45; // add 45 degrees if the player is also pressing LEFT
+		    else if (_right)
+		        mA -= 45; // or subtract 45 if they are pressing RIGHT
+		    facing = FlxObject.DOWN; // the sprite is facing DOWN
+		}
+		else if (_left) // if the player is not pressing UP or DOWN, but they are pressing LEFT
+		{
+		    mA = 180; // set our angle to 180 (9 o'clock)
+		    facing = FlxObject.LEFT; // the sprite should be facing LEFT
+		}
+		else if (_right) // the player is not pressing UP, DOWN, or LEFT, and they ARE pressing RIGHT
+		{
+		    mA = 0; // set our angle to 0 (3 o'clock)
+		    facing = FlxObject.RIGHT; // set the sprite's facing to RIGHT
+		}
+		FlxAngle.rotatePoint(speed, 0, 0, 0, mA, velocity); // determine our velocity based on angle and speed
+		if ((velocity.x != 0 || velocity.y != 0) && touching == FlxObject.NONE) // if the player is moving (velocity is not 0 for either axis), we need to change the animation to match their facing
+		{
+		    switch(facing)
+		    {
+		        case FlxObject.LEFT, FlxObject.RIGHT:
+		            animation.play("lr");
+		        case FlxObject.UP:
+		            animation.play("u");
+		        case FlxObject.DOWN:
+		            animation.play("d");
+		    }
+		}
 
-				facing = FlxObject.UP;
-			}
-			else if (_down)
-			{
-				mA = 90;
-				if (_left)
-					mA += 45;
-				else if (_right)
-					mA -= 45;
-
-				facing = FlxObject.DOWN;
-			}
-			else if (_left)
-			{
-				mA = 180;
-				facing = FlxObject.LEFT;
-			}
-			else if (_right)
-			{
-				mA = 0;
-				facing = FlxObject.RIGHT;
-			}
-
-			FlxAngle.rotatePoint(speed, 0, 0, 0, mA, velocity);
-		} else {
-			// don't move if no keys are down
-			FlxAngle.rotatePoint(0, 0, 0, 0, 0, velocity);
-			if (this.animation.curAnim != null) {
-				this.animation.curAnim.curFrame = 0;
-				this.animation.curAnim.stop();				
-			}
+		if (!_up && !_down && !_right && !_left) {
+				// don't move if no keys are down
+				FlxAngle.rotatePoint(0, 0, 0, 0, 0, velocity);
+				if (this.animation.curAnim != null) {
+					this.animation.curAnim.curFrame = 0;
+					this.animation.curAnim.stop();
+				}
 		}
 	}
 
 
 	override public function update():Void
 	{
-		movement();
+		move();
 		super.update();
 	}
 

@@ -7,6 +7,7 @@ import flixel.text.FlxText;
 import flixel.ui.FlxButton;
 import flixel.util.FlxMath;
 import flixel.FlxObject;
+import flixel.input.gamepad.OUYAButtonID;
 
 /**
  * A FlxState which can be used for the actual gameplay.
@@ -17,7 +18,7 @@ class PlayState extends FlxState
 	 * Function that is called up when to state is created to set it up.
 	 */
 
-	var player:Player;
+	private var player:Player;
 
 	override public function create():Void
 	{
@@ -41,7 +42,8 @@ class PlayState extends FlxState
 			}
 		}
 
-		add(new Player(200, 100));		
+		player = new Player(200, 100);
+		add(player);
 	}
 
 	/**
