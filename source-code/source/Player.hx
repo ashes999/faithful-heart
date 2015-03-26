@@ -75,17 +75,22 @@ class Player extends FlxSprite
 				return;
 			#end
 		} else {
-			// TODO: turns into LEFT_ANALOG_STICK
+			// TODO: turns into LEFT_ANALOG_STICK _X/_Y
 			var xAxisValue = gamePad.getXAxis(OUYAButtonID.LEFT_ANALOGUE_X);
 			var yAxisValue = gamePad.getYAxis(OUYAButtonID.LEFT_ANALOGUE_Y);
-      var angle:Float;
+      var angle:Float = 0;
 
-      if (xAxisValue != 0 || yAxisValue != 0)
-			{
-				angle = Math.atan2(yAxisValue, xAxisValue);
-				gamePadX = Math.cos(angle);
-				gamePadY = Math.sin(angle);
-			}
+      //if (xAxisValue != 0 || yAxisValue != 0)
+			//{
+        //trace("X=" + xAxisValue + " Y=" + yAxisValue);
+				//angle = Math.atan2(yAxisValue, xAxisValue);
+				//gamePadX = Math.cos(angle);
+				//gamePadY = Math.sin(angle);        
+        //trace("XYZ=(" + gamePadX + ", " + gamePadY + ")");
+			//}
+      
+      gamePadX = xAxisValue;
+      gamePadY = yAxisValue;
 		}
 
 		var _up:Bool = false;
