@@ -30,15 +30,18 @@ class Player extends FlxSprite
 		var cWidth = Std.parseInt(data.character.width);
 		var cHeight = Std.parseInt(data.character.height);
 		var fps = Std.parseInt(data.character.fps);
+		var frames = Std.parseInt(data.character.frames);
+
 		this.speed = Std.parseInt(data.character.speed);
-		trace("Character is " + cWidth + "x" + cHeight);
+
+		trace("Character is " + cWidth + "x" + cHeight + " and " + frames + " frames");
 
 		loadGraphic("assets/images/player.png", true, cWidth, cHeight);
 		// allow auto-flipping
 		setFacingFlip(FlxObject.LEFT, false, false);
 		setFacingFlip(FlxObject.RIGHT, true, false);
 		//animation.add("d", [0, 1, 0, 2], fps, true);
-		animation.add("lr", [0, 1, 2, 3], fps, true);
+		animation.add("lr", [for (i in 0...frames) i], fps, true);
 		//animation.add("u", [6, 7, 6, 8], fps, true);
 	}
 
@@ -85,10 +88,10 @@ class Player extends FlxSprite
         //trace("X=" + xAxisValue + " Y=" + yAxisValue);
 				//angle = Math.atan2(yAxisValue, xAxisValue);
 				//gamePadX = Math.cos(angle);
-				//gamePadY = Math.sin(angle);        
+				//gamePadY = Math.sin(angle);
         //trace("XYZ=(" + gamePadX + ", " + gamePadY + ")");
 			//}
-      
+
       gamePadX = xAxisValue;
       gamePadY = yAxisValue;
 		}
